@@ -7,4 +7,6 @@ import frappe
 from frappe.model.document import Document
 
 class CarrierSettings(Document):
-	pass
+#	pass
+	def validate(self):
+		self.title = self.carrier_name

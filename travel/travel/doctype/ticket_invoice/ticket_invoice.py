@@ -16,13 +16,14 @@ class TicketInvoice(AccountsController):
 #	pass
 
 	def validate(self):
+		self.title = self.customer_name
 		i = 0
 		for d in self.items:
 			j = i + 1
 			i = i + 1
 			while j < len(self.items):
 				if d.ticket_no == self.items[j].get('ticket_no'):
-					frappe.msgprint("Ticket No {0} is duplicated with row number {1}". format(d.ticket_no, j+1));
+					frappe.throw(_("Ticket No {0} is duplicated with row number {1}"). format(d.ticket_no, j+1));
 				j = j+1
 				
 			parent = frappe.db.get_value("Ticket Invoice Ticket",{"ticket_no": d.ticket_no, "docstatus": ["!=", 2], "parent": ["!=", self.name]}, "parent")
@@ -46,20 +47,26 @@ class TicketInvoice(AccountsController):
 
 	def make_gl_entries(self):
 		customer_against = self.supplier + " + " + self.income_account
-		customer_gl_entries =  self.get_gl_dict({
+
+		gl_entry = []
+
+#		customer_gl_entries =  self.get_gl_dict({
+		gl_entry.append(self.get_gl_dict({
 			"account": self.receivable_account,
 			"against": customer_against,
 			"party_type": "Customer",
 			"party": self.customer,
-			"debit": self.cust_grand_total_amount,
+			"debit": self.cust_grand_total_amount - self.paid_amount,
 			"debit_in_account_currency": self.cust_grand_total_amount,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center
-		})
+		}))
 
 		supplier_against = self.customer + " - " + self.income_account
-		supplier_gl_entry = self.get_gl_dict({
+
+#		supplier_gl_entry = self.get_gl_dict({
+		gl_entry.append(self.get_gl_dict({
 			"account": self.payable_account,
 			"against": supplier_against,
 			"party_type": "Supplier",
@@ -69,11 +76,12 @@ class TicketInvoice(AccountsController):
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center
-		})
+		}))
 
 		income_against = self.customer + " - " + self.supplier 
 
-		income_gl_entry = self.get_gl_dict({
+#		income_gl_entry = self.get_gl_dict({
+		gl_entry.append(self.get_gl_dict({
 			"account": self.income_account,
 			"against": income_against,
 			"credit": self.uatp_grand_total_amount,
@@ -81,11 +89,26 @@ class TicketInvoice(AccountsController):
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center
-		})
+		}))
 
-		make_gl_entries([customer_gl_entries, supplier_gl_entry, income_gl_entry], cancel=(self.docstatus == 2),
-				update_outstanding="No", merge_entries=False)
+		if float(self.paid_amount) > 0:
+#			payment_gl_entry = []
+			payments = frappe.get_doc("Ticket Invoice", self.name).get('payments')
+			for d in payments:
+				gl_entry.append(self.get_gl_dict({
+	                               "account": d.get('account'),
+	                               "against": self.customer,
+	                               "debit": d.get('amount'),
+	                               "debit_in_account_currency": d.get('amount'),
+	                               "against_voucher": self.name,
+	                               "against_voucher_type": self.doctype,
+	                               "cost_center": self.cost_center
+	                       }))
 
+#		make_gl_entries([customer_gl_entries, supplier_gl_entry, income_gl_entry], cancel=(self.docstatus == 2),
+#				update_outstanding="No", merge_entries=False)
+
+		make_gl_entries(gl_entry, cancel=(self.docstatus == 2), update_outstanding="No", merge_entries=False)
 
 
 @frappe.whitelist()
