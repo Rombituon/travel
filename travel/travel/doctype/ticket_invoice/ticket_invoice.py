@@ -57,7 +57,7 @@ class TicketInvoice(AccountsController):
 			"party_type": "Customer",
 			"party": self.customer,
 			"debit": self.cust_grand_total_amount - self.paid_amount,
-			"debit_in_account_currency": self.cust_grand_total_amount,
+			"debit_in_account_currency": self.cust_grand_total_amount - self.paid_amount,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center
@@ -71,8 +71,8 @@ class TicketInvoice(AccountsController):
 			"against": supplier_against,
 			"party_type": "Supplier",
 			"party": self.supplier,
-			"credit": self.supp_total_amount,
-			"credit_in_account_currency": self.supp_total_amount,
+			"credit": self.supp_grand_total_amount,
+			"credit_in_account_currency": self.supp_grand_total_amount,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center

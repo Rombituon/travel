@@ -125,7 +125,7 @@ frappe.ui.form.on('Ticket Invoice', {
 			frm.doc.discount_percent = flt(frm.doc.discount_amount) * 100 / flt(frm.doc.cust_total_amount);
 			refresh_field("discount_percent");	
 			frm.set_value("cust_grand_total_amount", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
-			frm.set_value("uatp_grand_total_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.supp_total_amount));
+			frm.set_value("uatp_grand_total_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.supp_grand_total_amount));
 			frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.paid_amount));
 		}
 		else {
@@ -140,7 +140,7 @@ frappe.ui.form.on('Ticket Invoice', {
 		frm.doc.discount_amount = flt(frm.doc.discount_percent) * flt(frm.doc.cust_total_amount) / 100;
 		refresh_field("discount_amount");	
 		frm.set_value("cust_grand_total_amount", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
-		frm.set_value("uatp_grand_total_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.supp_total_amount));
+		frm.set_value("uatp_grand_total_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.supp_grand_total_amount));
 		frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.paid_amount));
 	},
 
@@ -521,12 +521,12 @@ var items_calculation = function(frm, cdt, cdn) {
 		total_amount_cust = total_amount_cust + flt(row.cust_total_amount);
 		total_amount_uatp = total_amount_uatp + flt(row.uatp_amount);
 	});
-	frm.set_value("supp_total_amount", total_amount_supp);
+	frm.set_value("supp_grand_total_amount", total_amount_supp);
 	frm.set_value("cust_total_amount", total_amount_cust);
 	frm.set_value("uatp_total_amount", total_amount_uatp);
 	frm.set_value("discount_amount", flt(frm.doc.cust_total_amount) * flt(frm.doc.discount_percent) / 100);
 	frm.set_value("cust_grand_total_amount", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
-	frm.set_value("uatp_grand_total_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.supp_total_amount));
+	frm.set_value("uatp_grand_total_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.supp_grand_total_amount));
 	frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total_amount) - flt(frm.doc.paid_amount));
 }
 
