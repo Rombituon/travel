@@ -58,23 +58,28 @@ frappe.ui.form.on('Tour Invoice', {
 			});
 		}
 */
-		frappe.call({
-			method: "travel.travel.doctype.ticket_invoice.ticket_invoice.get_company_accounts",
-			args: {
-				company: frm.doc.company
-			},
-			callback: function(r) {
-				if (r.message) {
-					cur_frm.set_value("receivable_account", r.message[0]['default_receivable_account']);
-					cur_frm.set_value("payable_account", r.message[0]['default_payable_account']);
-					cur_frm.set_value("income_account", r.message[0]['default_income_account']);
-					cur_frm.set_value("cost_center", r.message[0]['cost_center']);
+		if (frm.doc.__islocal == 1) {
+			frappe.call({
+				method: "travel.travel.doctype.ticket_invoice.ticket_invoice.get_company_accounts",
+				args: {
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message) {
+						cur_frm.set_value("receivable_account", r.message[0][0]['default_receivable_account']);
+						cur_frm.set_value("payable_account", r.message[0][0]['default_payable_account']);
+						cur_frm.set_value("income_account", r.message[0][0]['default_income_account']);
+						cur_frm.set_value("cost_center", r.message[0][0]['cost_center']);
+						cur_frm.set_value("def_sales_vat_acc", r.message[1]);
+						cur_frm.set_value("def_purchase_vat_acc", r.message[2]);
+						cur_frm.set_value("vat_to_be_paid_acc", r.message[3]);
+					}
+					else {
+						frappe.msgprint(__("There are not a default accounts in the Company {0}, please select the Accounts", [frm.doc.company]));
+					}
 				}
-				else {
-					frappe.msgprint(__("There are not a default accounts in the Company {0}, please select the Accounts", [frm.doc.company]));
-				}
-			}
-		});
+			});
+		}
 
 		frm.set_query('customer', function(doc) {
 			return {
@@ -125,9 +130,9 @@ frappe.ui.form.on('Tour Invoice', {
 			frm.doc.discount_percent = flt(frm.doc.discount_amount) * 100 / flt(frm.doc.cust_total_amount);
 			refresh_field("discount_percent");	
 			frm.set_value("cust_net_total_bv", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
-			frm.set_value("cust_grand_total_av", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
-			frm.set_value("c_s_av", flt(frm.doc.cust_grand_total_av) - flt(frm.doc.supp_grand_total_av));
-			frm.set_value("outstanding_amount", flt(frm.doc.c_s_av) - flt(frm.doc.paid_amount));
+			frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
+			frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
+			frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 		}
 		else {
 			frm.doc.discount_amount = 0;
@@ -141,9 +146,9 @@ frappe.ui.form.on('Tour Invoice', {
 		frm.doc.discount_amount = flt(frm.doc.discount_percent) * flt(frm.doc.cust_total_amount) / 100;
 		refresh_field("discount_amount");	
 		frm.set_value("cust_net_total_bv", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
-		frm.set_value("cust_grand_total_av", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
-		frm.set_value("c_s_av", flt(frm.doc.cust_grand_total_av) - flt(frm.doc.supp_grand_total_av));
-		frm.set_value("outstanding_amount", flt(frm.doc.c_s_av) - flt(frm.doc.paid_amount));
+		frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
+		frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
+		frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 	},
 
         make_payment_entry: function(frm) {
@@ -163,6 +168,11 @@ frappe.ui.form.on('Tour Invoice', {
 });
 
 frappe.ui.form.on('Tour Invoice Item', {
+
+	items_remove: function(frm, cdt, cdn) {
+		items_calculation(frm, cdt, cdn);
+	},
+
 	service_description: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 //		d.tour_id = frm.doc.tour_id;
@@ -220,6 +230,11 @@ frappe.ui.form.on('Tour Invoice Item', {
 
 
 frappe.ui.form.on('Ticket Invoice Payment', {
+    
+	payments_remove: function(frm, cdt, cdn) {
+		paid_amount_calculation(frm, cdt, cdn);
+	},
+
 	mode_of_payment: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		get_payment_mode_account(frm, d.mode_of_payment, function(account){
@@ -248,10 +263,10 @@ var items_calculation = function(frm, cdt, cdn) {
 	frm.set_value("supp_net_total_bv", total_amount_supp_bv);
 	frm.set_value("customer_vat", total_amount_cust_vat);
 	frm.set_value("supplier_vat", total_amount_supp_vat);
-	frm.set_value("cust_grand_total_av", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
-	frm.set_value("supp_grand_total_av",  flt(frm.doc.supp_net_total_bv) + flt(frm.doc.supplier_vat));
-	frm.set_value("c_s_av", flt(frm.doc.cust_grand_total_av) - flt(frm.doc.supp_grand_total_av));
-	frm.set_value("outstanding_amount", flt(frm.doc.c_s_av) - flt(frm.doc.paid_amount));
+	frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
+	frm.set_value("supp_grand_total",  flt(frm.doc.supp_net_total_bv) + flt(frm.doc.supplier_vat));
+	frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
+	frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 }
 
 var get_payment_mode_account = function(frm, mode_of_payment, callback) {
@@ -285,5 +300,5 @@ var paid_amount_calculation = function(frm, cdt, cdn) {
 		total_paid_amount = total_paid_amount + flt(row.amount);
 	});
 	frm.set_value("paid_amount", total_paid_amount);
-	frm.set_value("outstanding_amount", flt(frm.doc.c_s_av) - flt(frm.doc.paid_amount));
+	frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 }

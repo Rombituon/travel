@@ -41,7 +41,7 @@ class TourInvoice(AccountsController):
 		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def on_submit(self):
-		if (self.cust_grand_total_av != 0):
+		if (self.cust_grand_total != 0):
 			self.make_gl_entries()
 
 	def make_gl_entries(self):
@@ -55,8 +55,18 @@ class TourInvoice(AccountsController):
 #			"against": customer_against,
 			"party_type": "Customer",
 			"party": self.customer,
-			"debit": self.cust_grand_total_av - self.paid_amount,
-			"debit_in_account_currency": self.cust_grand_total_av - self.paid_amount,
+			"debit": self.cust_grand_total,
+			"debit_in_account_currency": self.cust_grand_total,
+			"against_voucher": self.name,
+			"against_voucher_type": self.doctype,
+			"cost_center": self.cost_center
+		}))
+
+		gl_entry.append(self.get_gl_dict({
+			"account": self.def_sales_vat_acc,
+			"against": self.customer,
+			"credit": self.customer_vat,
+			"credit_in_account_currency": self.customer_vat,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center
@@ -79,14 +89,24 @@ class TourInvoice(AccountsController):
 				"cost_center": self.cost_center
 			}))
 
+			gl_entry.append(self.get_gl_dict({
+				"account": self.def_purchase_vat_acc,
+				"against": d.get('supplier'),
+				"debit": d.get('supp_vat'),
+				"debit_in_account_currency": d.get('supp_vat'),
+				"against_voucher": self.name,
+				"against_voucher_type": self.doctype,
+				"cost_center": self.cost_center
+			}))
+
 #		income_against = self.customer + " - " + self.supplier 
 
 #		income_gl_entry = self.get_gl_dict({
 		gl_entry.append(self.get_gl_dict({
 			"account": self.income_account,
 #			"against": income_against,
-			"credit": self.c_s_av,
-			"credit_in_account_currency": self.c_s_av,
+			"credit": self.c_s,
+			"credit_in_account_currency": self.c_s,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype,
 			"cost_center": self.cost_center
@@ -97,14 +117,26 @@ class TourInvoice(AccountsController):
 			payments = frappe.get_doc("Tour Invoice", self.name).get('payments')
 			for d in payments:
 				gl_entry.append(self.get_gl_dict({
-	                               "account": d.get('account'),
-	                               "against": self.customer,
-	                               "debit": d.get('amount'),
-	                               "debit_in_account_currency": d.get('amount'),
-	                               "against_voucher": self.name,
-	                               "against_voucher_type": self.doctype,
-	                               "cost_center": self.cost_center
-	                       }))
+					"account": d.get('account'),
+					"against": self.customer,
+					"debit": d.get('amount'),
+					"debit_in_account_currency": d.get('amount'),
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
+				}))
+
+				gl_entry.append(self.get_gl_dict({
+					"account": self.receivable_account,
+					"against": d.get('account'),
+					"party_type": "Customer",
+					"party": self.customer,
+					"credit": d.get('amount'),
+					"credit_in_account_currency": d.get('amount'),
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
+				}))
 
 #		make_gl_entries([customer_gl_entries, supplier_gl_entry, income_gl_entry], cancel=(self.docstatus == 2),
 #				update_outstanding="No", merge_entries=False)
