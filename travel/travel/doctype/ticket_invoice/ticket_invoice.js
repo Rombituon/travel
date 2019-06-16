@@ -89,7 +89,7 @@ frappe.ui.form.on('Ticket Invoice', {
 		if (frm.doc.customer) {
 			frappe.call({
 				method: "erpnext.accounts.utils.get_balance_on",
-				args: {date: frm.doc.posting_date, party_type: 'Customer', party: frm.doc.customer},
+				args: {date: frm.doc.posting_date, party_type: 'Customer', party: frm.doc.customer, company: frm.doc.company},
 				callback: function(r) {
 					if (flt(r.message) == 0) {
 						frm.set_value("customer_balance", "0.00");
@@ -107,7 +107,7 @@ frappe.ui.form.on('Ticket Invoice', {
 		if (frm.doc.supplier) {
 			frappe.call({
 				method: "erpnext.accounts.utils.get_balance_on",
-				args: {date: frm.doc.posting_date, party_type: 'Supplier', party: frm.doc.supplier},
+				args: {date: frm.doc.posting_date, party_type: 'Supplier', party: frm.doc.supplier, company: frm.doc.company},
 				callback: function(r) {
 					if (flt(r.message) == 0) {
 						frm.set_value("supplier_balance", "0.00");

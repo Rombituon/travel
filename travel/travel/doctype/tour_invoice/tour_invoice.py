@@ -37,12 +37,15 @@ class TourInvoice(AccountsController):
 #					frappe.throw(_("Carrier No {0} is not existed for any carrier"). format(d.ticket_no.split('-')[0]))
 #			elif not d.ticket_no:
 #				frappe.throw(_("Ticket No should not be empty. Please check ticket no at row # {0}"). format(i))
+		self.set_status()
 	def on_cancel(self):
 		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		self.set_status()
 
 	def on_submit(self):
 		if (self.cust_grand_total != 0):
 			self.make_gl_entries()
+		self.set_status()
 
 	def make_gl_entries(self):
 #		customer_against = self.supplier + " + " + self.income_account

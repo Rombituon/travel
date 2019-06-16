@@ -1,5 +1,6 @@
 frappe.listview_settings['Tour Invoice'] = {
-	add_fields: ["outstanding_amount", "due_date"],
+	add_fields: ["status", "outstanding_amount", "due_date"],
+	filters: [["status", "!=", "Cancelled"]],
 	get_indicator: function(doc) {
 		if(flt(doc.outstanding_amount)<=0) {
 			return [__("Paid"), "green", "outstanding_amount,=,0"];

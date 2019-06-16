@@ -1,5 +1,6 @@
 frappe.listview_settings['Ticket Invoice'] = {
-	add_fields: ["cust_grand_total_amount", "outstanding_amount", "due_date"],
+	add_fields: ["status", "cust_grand_total_amount", "outstanding_amount", "due_date"],
+	filters: [["status","!=","Cancelled"]],
 	get_indicator: function(doc) {
 		if(flt(doc.outstanding_amount)<=0) {
 			return [__("Paid"), "green", "outstanding_amount,=,0"];
