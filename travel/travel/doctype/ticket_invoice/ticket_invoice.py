@@ -4,12 +4,14 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import utils, _
 import string, random, re
 from frappe.model.document import Document
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.general_ledger import delete_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
-from frappe import utils, _
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_allow_cost_center_in_entry_of_bs_account
+from erpnext.accounts.party import get_party_account
 
 #class TicketInvoice(Document):
 class TicketInvoice(AccountsController):
@@ -126,6 +128,17 @@ class TicketInvoice(AccountsController):
 #				update_outstanding="No", merge_entries=False)
 
 		make_gl_entries(gl_entry, cancel=(self.docstatus == 2), update_outstanding="No", merge_entries=False)
+
+@frappe.whitelist()
+def get_party_details(party_type, party, company):
+
+	party_account =  get_party_account(party_type, party, company)
+#	frappe.msgprint("Customer Account is {0}" .format(customer_account))
+	if party_account:
+		party_currency = get_account_currency(party_account)
+	else:
+		party_currency = None
+	return party_account, party_currency
 
 
 @frappe.whitelist()

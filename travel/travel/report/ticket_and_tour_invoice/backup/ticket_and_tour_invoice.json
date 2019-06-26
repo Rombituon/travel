@@ -1,0 +1,24 @@
+{
+ "add_total_row": 1,
+ "creation": "2019-06-24 02:21:11.516575",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2019-06-24 02:21:11.516575",
+ "modified_by": "Administrator",
+ "module": "Travel",
+ "name": "Ticket and Tour Invoice",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Ticket Invoice",
+ "report_name": "Ticket and Tour Invoice",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

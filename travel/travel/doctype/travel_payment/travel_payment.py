@@ -6,5 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class TicketInvoicePayment(Document):
+class TravelPayment(Document):
 	pass
+
+
+
+@frappe.whitelist()
+def get_account_currency(account):
+
+	account_currency = frappe.db.get_value("Account", account, 'account_currency')
+	return account_currency

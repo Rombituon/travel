@@ -29,5 +29,23 @@ def get_data():
 					"description": _("Carrier Settings")
 				}
 			]
+		},
+		{
+			"label": _("Report"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Carrier Tickets",
+					"doctype": "Ticket Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Ticket and Tour Invoice",
+					"doctype": "Ticket Invoice"
+				},
+			]
 		}
 	]

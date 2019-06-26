@@ -59,6 +59,7 @@ frappe.ui.form.on('Ticket Invoice', {
 		}
 */
 		if (frm.doc.__islocal == 1) {
+			cur_frm.set_value("status", 'Draft');
 			frappe.call({
 				method: "travel.travel.doctype.ticket_invoice.ticket_invoice.get_company_accounts",
 				args: {
@@ -97,9 +98,29 @@ frappe.ui.form.on('Ticket Invoice', {
 					else {
 						frm.set_value("customer_balance", r.message);
 					}
-					refresh_field('customer_balance');
 				}
 			});
+
+			frappe.call({
+				method: "travel.travel.doctype.ticket_invoice.ticket_invoice.get_party_details",
+				args: {
+					party_type: 'Customer',
+					party: frm.doc.customer,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message[1]) {
+						frm.set_value("customer_currency", r.message[1]);
+						if (r.message[1] != 'USD') {
+							frappe.msgprint(__("This Customer Account is {0} and it should be USD, please select another customer account or the transaction will not be allowed", [r.message[1]]));
+						}
+					}
+					else {
+						frm.set_value("customer_currency", "USD");
+					}
+				}
+			});
+
 		}
 	},
 
@@ -118,6 +139,27 @@ frappe.ui.form.on('Ticket Invoice', {
 					refresh_field('supplier_balance');
 				}
 			});
+
+			frappe.call({
+				method: "travel.travel.doctype.ticket_invoice.ticket_invoice.get_party_details",
+				args: {
+					party_type: 'Supplier',
+					party: frm.doc.supplier,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message[1]) {
+						frm.set_value("supplier_currency", r.message[1]);
+						if (r.message[1] != 'USD') {
+							frappe.msgprint(__("This Supplier Account is {0} and it should be USD, please select another supplier account or the transaction will not be allowed", [r.message[1]]));
+						}
+					}
+					else {
+						frm.set_value("supplier_currency", "USD");
+					}
+				}
+			});
+
 		}
 	},
 
@@ -508,7 +550,7 @@ frappe.ui.form.on('Ticket Invoice Ticket', {
 });
 
 
-frappe.ui.form.on('Ticket Invoice Payment', {
+frappe.ui.form.on('Travel Payment', {
 
 	payments_remove: function(frm, cdt, cdn) {
 		paid_amount_calculation(frm, cdt, cdn);
