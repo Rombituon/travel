@@ -41,7 +41,7 @@ frappe.ui.form.on('Ticket Invoice', {
 		}
 	},
 	onload: function(frm) {
-		frappe.msgprint(__("Welcome ... TEST 2"));
+		frappe.msgprint(__("Welcome ... TEST 3"));
 /*	    
 		if (frm.doc.__islocal == 1) {
 			frappe.call({
