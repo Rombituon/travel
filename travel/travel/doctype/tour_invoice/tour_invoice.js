@@ -483,6 +483,7 @@ frappe.ui.form.on('Tour Invoice Item', {
 		var d = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "supp_total_av", flt(d.supp_total_bv) + flt(d.supp_vat));	
 		frappe.model.set_value(cdt, cdn, "base_supp_total_av", flt(d.supp_total_av) / d.supplier_exchange_rate);
+		frappe.model.set_value(cdt, cdn, "base_supp_vat", flt(d.supp_vat) / d.supplier_exchange_rate);
 		frm.set_currency_labels(["base_supp_total_av"], frm.doc.company_default_currency, "items");
 		items_calculation(frm, cdt, cdn);
 	}
