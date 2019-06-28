@@ -66,10 +66,10 @@ frappe.ui.form.on('Tour Invoice', {
 							cur_frm.set_value("vat_currency", 'LBP');
 							frappe.msgprint(__("Please set default currency in Global Defaults to be used for VAT currency"));
 						}
-						frm.set_currency_labels(["customer_vat_lbp"], frm.doc.vat_currency)
+						frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)
 						cur_frm.set_df_property("vat_currency_exchange_rate", "description",
 							("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.vat_currency));
-						refresh_field('customer_vat_lbp');
+						refresh_field('country_customer_vat');
 					}
 					else {
 						frappe.msgprint(__("There are not a default accounts in the Company {0}, please select the Accounts", 
@@ -151,6 +151,14 @@ frappe.ui.form.on('Tour Invoice', {
 		}
 	},
 
+	tour_end_date: function(frm) {
+		if (frm.doc.tour_end_date < frm.doc.tour_start_date)
+		{
+			frappe.msgprint(__("Tour End Date can not be before Tour Start Date, please select another date"));
+			cur_frm.set_value("tour_end_date", "");
+		}
+	},
+
 	account_currency: function(frm) {
 		if (frm.doc.account_currency) {
 			if (frm.doc.account_currency == frm.doc.company_default_currency) {
@@ -193,8 +201,8 @@ frappe.ui.form.on('Tour Invoice', {
 			frm.set_value("base_cust_net_total_bv", (flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount)) / frm.doc.customer_exchange_rate);
 			frm.set_value("customer_vat", flt(frm.doc.cust_net_total_bv) * 0.11);
 			frm.set_value("base_customer_vat", flt(frm.doc.cust_net_total_bv) * 0.11 / frm.doc.customer_exchange_rate);
-			frm.set_value("customer_vat_lbp", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
-			frm.set_currency_labels(["customer_vat_lbp"], frm.doc.vat_currency)
+			frm.set_value("country_customer_vat", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
+			frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)
 			frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
 			frm.set_value("base_cust_grand_total", (flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat)) / frm.doc.customer_exchange_rate);
 			frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
@@ -223,8 +231,8 @@ frappe.ui.form.on('Tour Invoice', {
 		frm.set_value("base_cust_net_total_bv", (flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount)) / frm.doc.customer_exchange_rate);
 		frm.set_value("customer_vat", flt(frm.doc.cust_net_total_bv) * 0.11);
 		frm.set_value("base_customer_vat", (flt(frm.doc.cust_net_total_bv) * 0.11) / frm.doc.customer_exchange_rate);
-		frm.set_value("customer_vat_lbp", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
-		frm.set_currency_labels(["customer_vat_lbp"], frm.doc.vat_currency)
+		frm.set_value("country_customer_vat", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
+		frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)
 		frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
 		frm.set_value("base_cust_grand_total", (flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat)) / frm.doc.customer_exchange_rate);
 		frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
@@ -270,8 +278,8 @@ frappe.ui.form.on('Tour Invoice', {
 			);
 		}
 		else {
-			frm.set_value("customer_vat_lbp", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
-			frm.set_currency_labels(["customer_vat_lbp"], frm.doc.vat_currency)	
+			frm.set_value("country_customer_vat", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
+			frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)	
 			cur_frm.set_df_property("vat_currency_exchange_rate", "description",
 				("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.vat_currency));
 		}
@@ -576,8 +584,8 @@ var items_calculation = function(frm, cdt, cdn) {
 	frm.set_value("customer_vat", total_amount_cust_vat);
 	frm.set_value("base_customer_vat", total_amount_cust_vat / frm.doc.customer_exchange_rate);
 	frm.set_currency_labels(["base_customer_vat"], frm.doc.company_default_currency);
-	frm.set_value("customer_vat_lbp", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
-	frm.set_currency_labels(["customer_vat_lbp"], frm.doc.vat_currency)
+	frm.set_value("country_customer_vat", flt(frm.doc.customer_vat) * flt(frm.doc.vat_currency_exchange_rate) / flt(frm.doc.customer_exchange_rate));
+	frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)
 	frm.set_value("supplier_vat", total_amount_supp_vat);
 	frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
 	frm.set_value("base_cust_grand_total", (flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat)) / frm.doc.customer_exchange_rate);
