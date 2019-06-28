@@ -241,7 +241,7 @@ frappe.ui.form.on('Tour Invoice', {
 			if (frm.doc.vat_currency == frm.doc.company_default_currency) {
 				cur_frm.set_value("vat_currency_exchange_rate", 1);
 		                cur_frm.set_df_property("vat_currency_exchange_rate", "description",
-		                            ("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.customer_currency));
+		                            ("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.vat_currency));
 		                cur_frm.set_df_property("vat_currency_exchange_rate", "read_only", 1);
 			}
 			else {
@@ -249,7 +249,7 @@ frappe.ui.form.on('Tour Invoice', {
 					function(exchange_rate) { 
 						me.frm.set_value("vat_currency_exchange_rate", exchange_rate);
 						cur_frm.set_df_property("vat_currency_exchange_rate", "description",
-							("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.customer_currency));
+							("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.vat_currency));
 						cur_frm.set_df_property("vat_currency_exchange_rate", "read_only", 0);
 					}
 				);
@@ -263,7 +263,7 @@ frappe.ui.form.on('Tour Invoice', {
 				function(exchange_rate) { 
 					frm.set_value("vat_currency_exchange_rate", exchange_rate);
 					cur_frm.set_df_property("vat_currency_exchange_rate", "description",
-						("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.customer_currency));
+						("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.vat_currency));
 					cur_frm.set_df_property("vat_currency_exchange_rate", "read_only", 0);
 				}
 			);
