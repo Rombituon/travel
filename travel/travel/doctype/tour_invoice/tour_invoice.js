@@ -69,6 +69,7 @@ frappe.ui.form.on('Tour Invoice', {
 						frm.set_currency_labels(["customer_vat_lbp"], frm.doc.vat_currency)
 						cur_frm.set_df_property("vat_currency_exchange_rate", "description",
 							("1 " + frm.doc.company_default_currency + " = [?] " + frm.doc.vat_currency));
+						refresh_field('customer_vat_lbp');
 					}
 					else {
 						frappe.msgprint(__("There are not a default accounts in the Company {0}, please select the Accounts", 
