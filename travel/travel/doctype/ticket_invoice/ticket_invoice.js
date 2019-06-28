@@ -29,7 +29,7 @@ frappe.ui.form.on('Ticket Invoice', {
 					from_date: frm.doc.posting_date,
 					to_date: frm.doc.posting_date,
 					company: frm.doc.company,
-					group_by_voucher: false
+					group_by: "Group by Voucher (Consolidated)"
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
