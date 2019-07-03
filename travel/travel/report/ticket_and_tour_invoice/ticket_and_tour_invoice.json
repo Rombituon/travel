@@ -10,11 +10,11 @@
  "modified": "2019-06-24 02:04:53.914198",
  "modified_by": "Administrator",
  "module": "Travel",
- "name": "Carrier Tickets",
+ "name": "Ticket and Tour Invoice",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Ticket Invoice",
- "report_name": "Carrier Tickets",
+ "report_name": "Ticket and Tour Invoice",
  "report_type": "Script Report",
  "roles": [
   {
