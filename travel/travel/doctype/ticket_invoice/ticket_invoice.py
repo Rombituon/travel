@@ -12,6 +12,7 @@ from erpnext.accounts.general_ledger import delete_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_allow_cost_center_in_entry_of_bs_account
 from erpnext.accounts.party import get_party_account
+from erpnext.setup.doctype.company.company import update_company_current_month_sales, update_company_current_month_purchase
 
 #class TicketInvoice(Document):
 class TicketInvoice(AccountsController):
@@ -44,11 +45,18 @@ class TicketInvoice(AccountsController):
 	def on_cancel(self):
 		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 		self.set_status()
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
+			update_company_current_month_purchase(self.company)
 
 	def on_submit(self):
 		if (self.cust_grand_total != 0):
 			self.make_gl_entries()
 		self.set_status()
+
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
+			update_company_current_month_purchase(self.company)
 
 	def make_gl_entries(self):
 		customer_against = self.supplier + " + " + self.income_account
@@ -128,6 +136,9 @@ class TicketInvoice(AccountsController):
 #				update_outstanding="No", merge_entries=False)
 
 		make_gl_entries(gl_entry, cancel=(self.docstatus == 2), update_outstanding="No", merge_entries=False)
+
+		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
+			update_company_current_month_sales(self.company)
 
 @frappe.whitelist()
 def get_party_details(party_type, party, company):

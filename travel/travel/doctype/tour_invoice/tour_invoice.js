@@ -205,6 +205,7 @@ frappe.ui.form.on('Tour Invoice', {
 			frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)
 			frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
 			frm.set_value("base_cust_grand_total", (flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat)) / frm.doc.customer_exchange_rate);
+			frm.set_value("base_supp_grand_total", (flt(frm.doc.supp_grand_total) / frm.doc.customer_exchange_rate));
 			frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
 			frm.set_value("base_c_s", flt(frm.doc.c_s) / frm.doc.customer_exchange_rate);
 
@@ -235,6 +236,7 @@ frappe.ui.form.on('Tour Invoice', {
 		frm.set_currency_labels(["country_customer_vat"], frm.doc.vat_currency)
 		frm.set_value("cust_grand_total", flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat));
 		frm.set_value("base_cust_grand_total", (flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat)) / frm.doc.customer_exchange_rate);
+		frm.set_value("base_supp_grand_total", (flt(frm.doc.supp_grand_total) / frm.doc.customer_exchange_rate));
 		frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
 		frm.set_value("base_c_s", flt(frm.doc.c_s) / frm.doc.customer_exchange_rate);
 		if (frm.doc.customer_currency == frm.doc.account_currency) {
@@ -591,6 +593,8 @@ var items_calculation = function(frm, cdt, cdn) {
 	frm.set_value("base_cust_grand_total", (flt(frm.doc.cust_net_total_bv) + flt(frm.doc.customer_vat)) / frm.doc.customer_exchange_rate);
 	frm.set_currency_labels(["base_cust_grand_total"], frm.doc.company_default_currency)
 	frm.set_value("supp_grand_total",  flt(frm.doc.supp_net_total_bv) + flt(frm.doc.supplier_vat));
+	frm.set_value("base_supp_grand_total", (flt(frm.doc.supp_grand_total) / frm.doc.customer_exchange_rate));
+	frm.set_currency_labels(["base_supp_grand_total"], frm.doc.company_default_currency)
 	frm.set_value("c_s", flt(frm.doc.cust_net_total_bv) - flt(frm.doc.supp_net_total_bv));
 	frm.set_value("base_c_s", flt(frm.doc.c_s) / frm.doc.customer_exchange_rate);
 	if (frm.doc.customer_currency == frm.doc.account_currency) {
