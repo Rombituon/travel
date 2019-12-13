@@ -16,6 +16,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Tour Invoice",
 					"description": _("Tour Invoice")
+				},
+				{
+					"type": "doctype",
+					"name": "Proforma Ticket Invoice",
+					"description": _("Proforma Ticket Invoice")
+				},
+				{
+					"type": "doctype",
+					"name": "Proforma Tour Invoice",
+					"description": _("Proforma Tour Invoice")
 				}
 			]
 		},

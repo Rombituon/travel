@@ -3,7 +3,7 @@
 cur_frm.add_fetch('customer', 'customer_name', 'customer_name')
 cur_frm.add_fetch('supplier', 'supplier_name', 'supplier_name')
 cur_frm.add_fetch('supplier', 'bsp', 'bsp')
-frappe.ui.form.on('Ticket Invoice', {
+frappe.ui.form.on('Proforma Ticket Invoice', {
 	refresh: function(frm) {
 		if (frm.doc.__islocal == 1) {
 			frappe.call({
@@ -170,7 +170,6 @@ frappe.ui.form.on('Ticket Invoice', {
 			refresh_field("discount_percent");	
 			frm.set_value("cust_grand_total", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
 			frm.set_value("uatp_grand_total", flt(frm.doc.cust_grand_total) - flt(frm.doc.supp_grand_total));
-			frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 		}
 		else {
 			frm.doc.discount_amount = 0;
@@ -185,7 +184,6 @@ frappe.ui.form.on('Ticket Invoice', {
 		refresh_field("discount_amount");	
 		frm.set_value("cust_grand_total", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
 		frm.set_value("uatp_grand_total", flt(frm.doc.cust_grand_total) - flt(frm.doc.supp_grand_total));
-		frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 	},
 
         make_payment_entry: function(frm) {
@@ -554,24 +552,6 @@ frappe.ui.form.on('Ticket Invoice Ticket', {
 	}
 });
 
-
-frappe.ui.form.on('Travel Payment', {
-
-	payments_remove: function(frm, cdt, cdn) {
-		paid_amount_calculation(frm, cdt, cdn);
-	},
-
-	mode_of_payment: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		get_payment_mode_account(frm, d.mode_of_payment, function(account){
-			frappe.model.set_value(cdt, cdn, 'account', account)
-		})
-	},
-	amount:  function(frm, cdt, cdn) {
-		paid_amount_calculation(frm, cdt, cdn);	
-	}
-});
-
 var items_calculation = function(frm, cdt, cdn) {
 	var total_amount_supp=0, total_amount_cust=0, total_amount_uatp = 0;
 
@@ -586,39 +566,4 @@ var items_calculation = function(frm, cdt, cdn) {
 	frm.set_value("discount_amount", flt(frm.doc.cust_total_amount) * flt(frm.doc.discount_percent) / 100);
 	frm.set_value("cust_grand_total", flt(frm.doc.cust_total_amount) - flt(frm.doc.discount_amount));
 	frm.set_value("uatp_grand_total", flt(frm.doc.cust_grand_total) - flt(frm.doc.supp_grand_total));
-	frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
-}
-
-var get_payment_mode_account = function(frm, mode_of_payment, callback) {
-
-	if(!frm.doc.company) {
-		frappe.throw(__("Please select the Company first"));
-	}
-
-	if(!mode_of_payment) {
-		return;
-	}
-
-	return  frappe.call({
-		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-		args: {
-			"mode_of_payment": mode_of_payment,
-			"company": frm.doc.company
-		},
-		callback: function(r, rt) {
-			if(r.message) {
-				callback(r.message.account)
-                        }
-		}
-	});
-}
-
-
-var paid_amount_calculation = function(frm, cdt, cdn) {
-	var total_paid_amount=0;
-	$.each(frm.doc.payments, function(i, row) {
-		total_paid_amount = total_paid_amount + flt(row.amount);
-	});
-	frm.set_value("paid_amount", total_paid_amount);
-	frm.set_value("outstanding_amount", flt(frm.doc.cust_grand_total) - flt(frm.doc.paid_amount));
 }
