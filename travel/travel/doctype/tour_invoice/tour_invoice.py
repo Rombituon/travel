@@ -91,13 +91,13 @@ class TourInvoice(AccountsController):
 				"account_currency": self.account_currency
 			}))
 
-
-		gl_entry.append(self.get_gl_dict({
-			"account": self.def_sales_vat_acc,
-			"against": self.customer,
-			"credit": self.base_customer_vat,
-			"credit_in_account_currency": self.base_customer_vat
-		}))
+		if float(self.base_customer_vat) > 0:
+			gl_entry.append(self.get_gl_dict({
+				"account": self.def_sales_vat_acc,
+				"against": self.customer,
+				"credit": self.base_customer_vat,
+				"credit_in_account_currency": self.base_customer_vat
+			}))
 
 		supplier_against = self.customer + " - " + self.income_account
 		suppliers_gl_entry = frappe.get_doc("Tour Invoice", self.name).get('items')
@@ -128,12 +128,13 @@ class TourInvoice(AccountsController):
 					"account_currency": d.get('supplier_account_currency')
 				}))
 
-			gl_entry.append(self.get_gl_dict({
-				"account": self.def_purchase_vat_acc,
-				"against": d.get('supplier'),
-				"debit": d.get('base_supp_vat'),
-				"debit_in_account_currency": d.get('base_supp_vat')
-			}))
+			if float(d.get('base_supp_vat')) > 0:
+				gl_entry.append(self.get_gl_dict({
+					"account": self.def_purchase_vat_acc,
+					"against": d.get('supplier'),
+					"debit": d.get('base_supp_vat'),
+					"debit_in_account_currency": d.get('base_supp_vat')
+				}))
 
 #		income_against = self.customer + " - " + self.supplier 
 
